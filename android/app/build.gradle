@@ -51,6 +51,9 @@ android {
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
+        ndk {
+            abiFilters 'arm64-v8a', 'armeabi-v7a'
+        }
     }
 
     buildTypes {
@@ -84,16 +87,11 @@ dependencies {
     }
     tasks.register("cargoBuild$taskPostfix", Exec) {
         workingDir "../../native"
-        environment ANDROID_NDK_HOME: "$ANDROID_NDK"
         commandLine 'cargo', 'ndk',
                 // the 2 ABIs below are used by real Android devices
                 '-t', 'armeabi-v7a',
                 '-t', 'arm64-v8a',
-                // the below 2 ABIs are usually used for Android simulators,
-                // add or remove these ABIs as needed.
-                '-t', 'x86',
-                '-t', 'x86_64',
-                '-o', '../android/app/src/main/jniLibs', 'build'
+                '-o', '../android/app/src/main/jniLibs', '--no-strip', 'build'
         if (profileMode != null) {
             args profileMode
         }

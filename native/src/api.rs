@@ -1,59 +1,43 @@
-// This is the entry point of your Rust library.
-// When adding new code to your project, note that only items used
-// here will be transformed to their Dart equivalents.
+use anyhow::anyhow;
+use incrementalmerkletree::Hashable;
+use lazy_static::lazy_static;
+use orchard::builder::Builder;
+use orchard::bundle::Flags;
+use orchard::circuit::{ProvingKey, VerifyingKey};
+use orchard::keys::{FullViewingKey, Scope, SpendAuthorizingKey, SpendingKey};
+use orchard::tree::MerkleHashOrchard;
+use orchard::value::NoteValue;
+use orchard::Bundle;
+use rand_chacha::rand_core::SeedableRng;
+use rand_chacha::ChaChaRng;
 
-// A plain enum without any fields. This is similar to Dart- or C-style enums.
-// flutter_rust_bridge is capable of generating code for enums with fields
-// (@freezed classes in Dart and tagged unions in C).
-pub enum Platform {
-    Unknown,
-    Android,
-    Ios,
-    Windows,
-    Unix,
-    MacIntel,
-    MacApple,
-    Wasm,
+lazy_static! {
+    static ref PK: ProvingKey = ProvingKey::build();
+    static ref VK: VerifyingKey = VerifyingKey::build();
 }
 
-// A function definition in Rust. Similar to Dart, the return type must always be named
-// and is never inferred.
-pub fn platform() -> Platform {
-    // This is a macro, a special expression that expands into code. In Rust, all macros
-    // end with an exclamation mark and can be invoked with all kinds of brackets (parentheses,
-    // brackets and curly braces). However, certain conventions exist, for example the
-    // vector macro is almost always invoked as vec![..].
-    //
-    // The cfg!() macro returns a boolean value based on the current compiler configuration.
-    // When attached to expressions (#[cfg(..)] form), they show or hide the expression at compile time.
-    // Here, however, they evaluate to runtime values, which may or may not be optimized out
-    // by the compiler. A variety of configurations are demonstrated here which cover most of
-    // the modern oeprating systems. Try running the Flutter application on different machines
-    // and see if it matches your expected OS.
-    //
-    // Furthermore, in Rust, the last expression in a function is the return value and does
-    // not have the trailing semicolon. This entire if-else chain forms a single expression.
-    if cfg!(windows) {
-        Platform::Windows
-    } else if cfg!(target_os = "android") {
-        Platform::Android
-    } else if cfg!(target_os = "ios") {
-        Platform::Ios
-    } else if cfg!(all(target_os = "macos", target_arch = "aarch64")) {
-        Platform::MacApple
-    } else if cfg!(target_os = "macos") {
-        Platform::MacIntel
-    } else if cfg!(target_family = "wasm") {
-        Platform::Wasm
-    } else if cfg!(unix) {
-        Platform::Unix
-    } else {
-        Platform::Unknown
-    }
-}
+pub fn test_from_seed(seed: u64) -> anyhow::Result<()> {
+    let mut seed_bytes = [0u8; 32];
+    seed_bytes[0..8].copy_from_slice(&seed.to_be_bytes());
+    let mut rng = ChaChaRng::from_seed(seed_bytes);
 
-// The convention for Rust identifiers is the snake_case,
-// and they are automatically converted to camelCase on the Dart side.
-pub fn rust_release_mode() -> bool {
-    cfg!(not(debug_assertions))
+    let sk = SpendingKey::from_bytes([0; 32]).unwrap();
+    let fvk = FullViewingKey::from(&sk);
+    let recipient = fvk.address_at(0u32, Scope::External);
+
+    let anchor = MerkleHashOrchard::empty_root(32.into()).into();
+    let mut builder = Builder::new(Flags::from_parts(false, true), anchor);
+    builder
+        .add_recipient(None, recipient, NoteValue::from_raw(1000), None)
+        .map_err(|e| anyhow!(e))?;
+    let unauthorized = builder.build(&mut rng).unwrap();
+    let sighash = unauthorized.commitment().into();
+    let proven = unauthorized.create_proof(&PK, &mut rng).unwrap();
+    let authorized: Bundle<_, i64> = proven
+        .apply_signatures(&mut rng, sighash, &[SpendAuthorizingKey::from(&sk)])
+        .map_err(|_| anyhow!("Error in apply_signatures"))?;
+
+    authorized.verify_proof(&VK)?;
+    println!("verified {}", seed);
+    Ok(())
 }

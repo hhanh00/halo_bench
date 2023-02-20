@@ -1,0 +1,26 @@
+name: Build and Release Android/FDroid
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Build
+        id: build
+        run: ./build-android.sh
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/v')
+        with:
+          files: |
+            ${{ steps.build.outputs.BUILD_DIR }}/halo-bench.apk

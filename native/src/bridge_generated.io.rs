@@ -2,13 +2,8 @@ use super::*;
 // Section: wire functions
 
 #[no_mangle]
-pub extern "C" fn wire_platform(port_: i64) {
-    wire_platform_impl(port_)
-}
-
-#[no_mangle]
-pub extern "C" fn wire_rust_release_mode(port_: i64) {
-    wire_rust_release_mode_impl(port_)
+pub extern "C" fn wire_test_from_seed(port_: i64, seed: u64) {
+    wire_test_from_seed_impl(port_, seed)
 }
 
 // Section: allocate functions
