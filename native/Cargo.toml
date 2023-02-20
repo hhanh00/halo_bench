@@ -3,16 +3,27 @@ name = "native"
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[[bin]]
+name = "gen_tests"
+path = "src/gen_tests.rs"
 
 [lib]
-crate-type = ["cdylib", "staticlib"]
+crate-type = ["rlib", "cdylib", "staticlib"]
 
 [dependencies]
 anyhow = "1"
 flutter_rust_bridge = "1"
 
+tiny-bip39 = "0.8"
 orchard = "0.3.0"
 incrementalmerkletree = "0.3.0"
 rand_chacha = "0.3.1"
 lazy_static = "1.4.0"
+
+serde = { version = "1", features = [ "derive"] }
+bincode = "1"
+
+[dependencies.zcash_primitives]
+git = "https://github.com/hhanh00/librustzcash.git"
+rev = "ad4a1c61fdaf04ac4fb884976ad175196e695264"
+features = [ "transparent-inputs" ]

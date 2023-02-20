@@ -1,43 +1,26 @@
-use anyhow::anyhow;
-use incrementalmerkletree::Hashable;
+use crate::build_tx::build_tx;
+use crate::tx_types::Tx;
+use crate::SEED;
 use lazy_static::lazy_static;
-use orchard::builder::Builder;
-use orchard::bundle::Flags;
 use orchard::circuit::{ProvingKey, VerifyingKey};
-use orchard::keys::{FullViewingKey, Scope, SpendAuthorizingKey, SpendingKey};
-use orchard::tree::MerkleHashOrchard;
-use orchard::value::NoteValue;
-use orchard::Bundle;
-use rand_chacha::rand_core::SeedableRng;
-use rand_chacha::ChaChaRng;
+
+pub const TXDESC_BYTES: &[u8] = include_bytes!("../tx.bin");
+pub const TX_BYTES: &[u8] = include_bytes!("../out.bin");
 
 lazy_static! {
     static ref PK: ProvingKey = ProvingKey::build();
     static ref VK: VerifyingKey = VerifyingKey::build();
+    static ref TXDESC: Tx = bincode::deserialize(TXDESC_BYTES).unwrap();
 }
 
-pub fn test_from_seed(seed: u64) -> anyhow::Result<()> {
-    let mut seed_bytes = [0u8; 32];
-    seed_bytes[0..8].copy_from_slice(&seed.to_be_bytes());
-    let mut rng = ChaChaRng::from_seed(seed_bytes);
+pub const TX_SIZE: usize = 9165;
 
-    let sk = SpendingKey::from_bytes([0; 32]).unwrap();
-    let fvk = FullViewingKey::from(&sk);
-    let recipient = fvk.address_at(0u32, Scope::External);
-
-    let anchor = MerkleHashOrchard::empty_root(32.into()).into();
-    let mut builder = Builder::new(Flags::from_parts(false, true), anchor);
-    builder
-        .add_recipient(None, recipient, NoteValue::from_raw(1000), None)
-        .map_err(|e| anyhow!(e))?;
-    let unauthorized = builder.build(&mut rng).unwrap();
-    let sighash = unauthorized.commitment().into();
-    let proven = unauthorized.create_proof(&PK, &mut rng).unwrap();
-    let authorized: Bundle<_, i64> = proven
-        .apply_signatures(&mut rng, sighash, &[SpendAuthorizingKey::from(&sk)])
-        .map_err(|_| anyhow!("Error in apply_signatures"))?;
-
-    authorized.verify_proof(&VK)?;
-    println!("verified {}", seed);
-    Ok(())
+pub fn test_from_seed(seed: u32) -> bool {
+    let res = build_tx(&TXDESC, SEED, seed, &PK);
+    if seed < 20 {
+        let offset = seed as usize * TX_SIZE;
+        let expected = &TX_BYTES[offset..offset + TX_SIZE];
+        return expected == &*res;
+    }
+    true
 }

@@ -58,25 +58,36 @@ class _HomePageState extends State<HomePage> {
       _running = false;
     } else {
       _running = true;
-      Future(() async {
-        while (_running) {
-          await test();
-          setState(() {});
-        }
-      });
+      Future(test);
     }
   }
 
   Future<void> test() async {
+    int s = 0;
     try {
-      print("Test seed: $_seed");
-      await api.testFromSeed(seed: _seed);
-      _seed += 1;
-    }
-    catch(e) {
-      _running = false;
-      _message = e.toString();
+      _message = "RUNNING";
       setState(() {});
+      for (s = 0; s < 20; s++) {
+        _seed = s;
+        setState(() {});
+        final res = await api.testFromSeed(seed: _seed);
+        if (!res) {
+          _message = "FAILED";
+          break;
+        }
+        if (!_running) {
+          _message = "ABORTED";
+          break;
+        }
+      }
     }
+    catch (e) {
+      _message = e.toString();
+    }
+    if (s == 20) {
+      _message = "SUCCESS";
+    }
+    _running = false;
+    setState(() {});
   }
 }

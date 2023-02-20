@@ -21,7 +21,7 @@ use std::sync::Arc;
 
 // Section: wire functions
 
-fn wire_test_from_seed_impl(port_: MessagePort, seed: impl Wire2Api<u64> + UnwindSafe) {
+fn wire_test_from_seed_impl(port_: MessagePort, seed: impl Wire2Api<u32> + UnwindSafe) {
     FLUTTER_RUST_BRIDGE_HANDLER.wrap(
         WrapInfo {
             debug_name: "test_from_seed",
@@ -30,7 +30,7 @@ fn wire_test_from_seed_impl(port_: MessagePort, seed: impl Wire2Api<u64> + Unwin
         },
         move || {
             let api_seed = seed.wire2api();
-            move |task_callback| test_from_seed(api_seed)
+            move |task_callback| Ok(test_from_seed(api_seed))
         },
     )
 }
@@ -56,8 +56,8 @@ where
         (!self.is_null()).then(|| self.wire2api())
     }
 }
-impl Wire2Api<u64> for u64 {
-    fn wire2api(self) -> u64 {
+impl Wire2Api<u32> for u32 {
+    fn wire2api(self) -> u32 {
         self
     }
 }

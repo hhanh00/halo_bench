@@ -2,7 +2,7 @@ use super::*;
 // Section: wire functions
 
 #[no_mangle]
-pub extern "C" fn wire_test_from_seed(port_: i64, seed: u64) {
+pub extern "C" fn wire_test_from_seed(port_: i64, seed: u32) {
     wire_test_from_seed_impl(port_, seed)
 }
 

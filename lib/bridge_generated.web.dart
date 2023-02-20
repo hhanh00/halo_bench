@@ -19,10 +19,6 @@ class NativePlatform extends FlutterRustBridgeBase<NativeWire>
 
 // Section: api2wire
 
-  @protected
-  Object api2wire_u64(int raw) {
-    return castNativeBigInt(raw);
-  }
 // Section: finalizer
 }
 
@@ -37,7 +33,7 @@ class NativeWasmModule implements WasmModule {
   external Object /* Promise */ call([String? moduleName]);
   external NativeWasmModule bind(dynamic thisArg, String moduleName);
   external dynamic /* void */ wire_test_from_seed(
-      NativePortType port_, Object seed);
+      NativePortType port_, int seed);
 }
 
 // Section: WASM wire connector
@@ -46,6 +42,6 @@ class NativeWire extends FlutterRustBridgeWasmWireBase<NativeWasmModule> {
   NativeWire(FutureOr<WasmModule> module)
       : super(WasmModule.cast<NativeWasmModule>(module));
 
-  void wire_test_from_seed(NativePortType port_, Object seed) =>
+  void wire_test_from_seed(NativePortType port_, int seed) =>
       wasmModule.wire_test_from_seed(port_, seed);
 }

@@ -19,11 +19,11 @@ class NativeImpl implements Native {
   factory NativeImpl.wasm(FutureOr<WasmModule> module) =>
       NativeImpl(module as ExternalLibrary);
   NativeImpl.raw(this._platform);
-  Future<void> testFromSeed({required int seed, dynamic hint}) {
-    var arg0 = _platform.api2wire_u64(seed);
+  Future<bool> testFromSeed({required int seed, dynamic hint}) {
+    var arg0 = api2wire_u32(seed);
     return _platform.executeNormal(FlutterRustBridgeTask(
       callFfi: (port_) => _platform.inner.wire_test_from_seed(port_, arg0),
-      parseSuccessData: _wire2api_unit,
+      parseSuccessData: _wire2api_bool,
       constMeta: kTestFromSeedConstMeta,
       argValues: [seed],
       hint: hint,
@@ -41,11 +41,15 @@ class NativeImpl implements Native {
   }
 // Section: wire2api
 
-  void _wire2api_unit(dynamic raw) {
-    return;
+  bool _wire2api_bool(dynamic raw) {
+    return raw as bool;
   }
 }
 
 // Section: api2wire
 
+@protected
+int api2wire_u32(int raw) {
+  return raw;
+}
 // Section: finalizer

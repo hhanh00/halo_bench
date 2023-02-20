@@ -10,7 +10,7 @@ import 'package:meta/meta.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge.dart';
 
 abstract class Native {
-  Future<void> testFromSeed({required int seed, dynamic hint});
+  Future<bool> testFromSeed({required int seed, dynamic hint});
 
   FlutterRustBridgeTaskConstMeta get kTestFromSeedConstMeta;
 }

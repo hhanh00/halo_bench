@@ -16,10 +16,6 @@ class NativePlatform extends FlutterRustBridgeBase<NativeWire> {
 
 // Section: api2wire
 
-  @protected
-  int api2wire_u64(int raw) {
-    return raw;
-  }
 // Section: finalizer
 
 // Section: api_fill_to_wire
@@ -131,7 +127,7 @@ class NativeWire implements FlutterRustBridgeWireBase {
   }
 
   late final _wire_test_from_seedPtr =
-      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int64, ffi.Uint64)>>(
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int64, ffi.Uint32)>>(
           'wire_test_from_seed');
   late final _wire_test_from_seed =
       _wire_test_from_seedPtr.asFunction<void Function(int, int)>();
@@ -156,3 +152,5 @@ class _Dart_Handle extends ffi.Opaque {}
 typedef DartPostCObjectFnType = ffi.Pointer<
     ffi.NativeFunction<ffi.Bool Function(DartPort, ffi.Pointer<ffi.Void>)>>;
 typedef DartPort = ffi.Int64;
+
+const int TX_SIZE = 9165;
