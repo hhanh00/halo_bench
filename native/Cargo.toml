@@ -14,7 +14,7 @@ crate-type = ["rlib", "cdylib", "staticlib"]
 anyhow = "1"
 flutter_rust_bridge = "1"
 
-tiny-bip39 = "0.8"
+tiny-bip39 = "1.0"
 orchard = "0.3.0"
 incrementalmerkletree = "0.3.0"
 rand_chacha = "0.3.1"
