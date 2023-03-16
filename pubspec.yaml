@@ -49,7 +49,7 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^2.0.0
   ffigen: ^7.2.4
-  flutter_launcher_icons: any
+  flutter_launcher_icons: ^0.12.0
 
 flutter_icons:
   android: true
