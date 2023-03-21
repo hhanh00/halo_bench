@@ -80,8 +80,7 @@ class _HomePageState extends State<HomePage> {
           break;
         }
       }
-    }
-    catch (e) {
+    } catch (e) {
       _message = e.toString();
     }
     if (s == 20) {

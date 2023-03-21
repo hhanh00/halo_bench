@@ -19,6 +19,7 @@ orchard = "0.3.0"
 incrementalmerkletree = "0.3.0"
 rand_chacha = "0.3.1"
 lazy_static = "1.4.0"
+halo2_proofs = { version = "0.2", default-features = false, features = ["batch", "floor-planner-v1-legacy-pdqsort"] }
 
 serde = { version = "1", features = [ "derive"] }
 bincode = "1"
@@ -27,3 +28,8 @@ bincode = "1"
 git = "https://github.com/hhanh00/librustzcash.git"
 rev = "ad4a1c61fdaf04ac4fb884976ad175196e695264"
 features = [ "transparent-inputs" ]
+
+[patch.crates-io]
+halo2_gadgets = { git = "https://github.com/zcash/halo2.git", rev = "642924d614305d882cc122739c59144109f4bd3f" }
+halo2_proofs = { git = "https://github.com/zcash/halo2.git", rev = "642924d614305d882cc122739c59144109f4bd3f" }
+orchard = { git = "https://github.com/zcash/orchard.git", rev = "6cbde279e90974201bedbd9b5ddf155e8f8b1e8e" }
